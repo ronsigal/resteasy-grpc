@@ -44,6 +44,10 @@ import org.jboss.resteasy.plugins.providers.sse.OutboundSseEventImpl;
 
 @Path("p")
 public class CC1 {
+    @Path("tmp")
+    @GET
+    public void v() {
+    }
 
     @Path("ready")
     @GET
@@ -622,13 +626,17 @@ public class CC1 {
         final Map<Class<?>, Object> map = ResteasyContext.getContextDataMap();
         executor.execute(() -> {
             ResteasyContext.addCloseableContextDataLevel(map);
-            try (SseEventSink sink = eventSink) {
-                eventSink.send(sse.newEvent("name1", "event1"));
-                eventSink.send(sse.newEvent("name2", "event2"));
-                eventSink.send(sse.newEvent("name3", "event3"));
-                OutboundSseEventImpl.BuilderImpl builder = new OutboundSseEventImpl.BuilderImpl();
-                builder.name("name4").data(new CC5(4));
-                eventSink.send(builder.build());
+            try {
+                try (SseEventSink sink = eventSink) {
+                    eventSink.send(sse.newEvent("name1", "event1"));
+                    eventSink.send(sse.newEvent("name2", "event2"));
+                    eventSink.send(sse.newEvent("name3", "event3"));
+                    OutboundSseEventImpl.BuilderImpl builder = new OutboundSseEventImpl.BuilderImpl();
+                    builder.name("name4").data(new CC5(4));
+                    eventSink.send(builder.build());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -636,6 +644,49 @@ public class CC1 {
     @GET
     @Path("copy")
     public String copy(String s) {
-        return s;
+        System.out.println("entering copy()");
+        //        new Exception("copy").printStackTrace();
+        //        return s;
+        throw new RuntimeException("copy: server");
+    }
+
+    @GET
+    @Path("identity")
+    public String identity(@Context HttpServletRequest request) throws Exception {
+        try {
+            System.out.println(ResteasyContext.getContextData(HttpServletRequest.class));
+            System.out.println(ResteasyContext.getContextData(HttpServletRequest.class).getClass());
+            HttpServletRequest r = (HttpServletRequest) ResteasyContext.getContextData(HttpServletRequest.class);
+            System.out.println(r.isSecure());
+
+            System.out.println("remote user: " + r.getRemoteUser());
+            System.out.println("user principal: " + r.getUserPrincipal());
+            r.login("bill", "pw");
+            System.out.println("remote user: " + r.getRemoteUser());
+            System.out.println("user principal: " + r.getUserPrincipal());
+            r.logout();
+            System.out.println("remote user: " + r.getRemoteUser());
+            System.out.println("user principal: " + r.getUserPrincipal());
+
+            System.out.println("remote user: " + request.getRemoteUser());
+            System.out.println("user principal: " + request.getUserPrincipal());
+            r.login("ron", "pw");
+            System.out.println("remote user: " + request.getRemoteUser());
+            System.out.println("user principal: " + request.getUserPrincipal());
+            r.logout();
+            System.out.println("remote user: " + request.getRemoteUser());
+            System.out.println("user principal: " + request.getUserPrincipal());
+            return "OK";
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @GET
+    @Path("isSecure")
+    public boolean isSecure(@Context HttpServletRequest request) {
+        System.out.println("server: isSecure(): " + request.isSecure());
+        return request.isSecure();
     }
 }

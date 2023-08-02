@@ -226,7 +226,7 @@ import dev.resteasy.grpc.bridge.runtime.servlet.HttpServletRequestImpl;
  */
 public class JavaToProtobufGenerator {
 
-    private static final Logger logger = Logger.getLogger(JavabufTranslatorGenerator.class);
+    private static final Logger logger = Logger.getLogger(JavaToProtobufGenerator.class);
     private static final String LS = System.lineSeparator();
 
     private static Map<String, String> TYPE_MAP = new HashMap<String, String>();
@@ -606,7 +606,9 @@ public class JavaToProtobufGenerator {
                             .append(httpMethod).append(" ")
                             .append(syncType).append("" + LS);
                     entityMessageTypes.add(entityType);
+                    System.out.println("adding entity type: " + md.getDeclarationAsString().toLowerCase() + ":" + entityType);
                     returnMessageTypes.add(returnType);
+                    System.out.println("adding return type: " + md.getDeclarationAsString().toLowerCase() + ":" + returnType);
                     sb.append("  rpc ")
                             .append(md.getNameAsString())
                             .append(" (")
@@ -926,39 +928,55 @@ public class JavaToProtobufGenerator {
         if (isSSE(md)) {
             return SSE_EVENT_CLASSNAME;
         }
-        for (Node node : md.getChildNodes()) {
-            if (node instanceof Type) {
-                if (node instanceof VoidType) {
-                    return "google.protobuf.Any"; // ??
-                }
-                String rawType = ((Type) node).asString();
-                int open = rawType.indexOf("<");
-                int close = rawType.indexOf(">");
-                if (open >= 0 && close > open) {
-                    String type = rawType.substring(0, open);
-                    String parameterType = rawType.substring(open + 1, close);
-                    if (CompletionStage.class.getCanonicalName().contentEquals(type)
-                            || CompletionStage.class.getSimpleName().contentEquals(type)) {
-                        rawType = parameterType;
-                    } else {
-                        rawType = type;
-                    }
-                }
-                if (PRIMITIVE_WRAPPER_TYPES.containsKey(rawType)) {
-                    return PRIMITIVE_WRAPPER_TYPES.get(rawType);
-                }
-                if ("jakarta.ws.rs.core.Response".equals(rawType) || "Response".equals(rawType)) {
-                    return "google.protobuf.Any";
-                }
-                // array?
-                ResolvedType rt = ((Type) node).resolve();
-                resolvedTypes.add(rt.asReferenceType().getTypeDeclaration().get());
-                String type = ((Type) node).resolve().describe();
-                return fqnifyClass(type, isInnerClass(rt.asReferenceType().getTypeDeclaration().get()));
-            }
+        System.out.println("md: " + md.getDeclarationAsString());
+        //        for (Node node : md.getChildNodes()) {
+        //            System.out.println("node1: " + node.toString());
+        //        }
+
+        if (md.getType() instanceof VoidType) {
+            return "google.protobuf.Any"; // ??
         }
-        needEmpty = true;
-        return "gEmpty";
+
+        String rawType = md.getTypeAsString();
+        //        for (Node node : md.getChildNodes()) {
+        //           System.out.println("node: " + node.toString());
+        //            if (node instanceof Type) {
+        //                if (node instanceof VoidType) {
+        //                    return "google.protobuf.Any"; // ??
+        //                }
+        ////                String rawType = ((Type) node).asString();
+        //                int open = rawType.indexOf("<");
+        //                int close = rawType.indexOf(">");
+        //                if (open >= 0 && close > open) {
+        //                    String type = rawType.substring(0, open);
+        //                    String parameterType = rawType.substring(open + 1, close);
+        //                    if (CompletionStage.class.getCanonicalName().contentEquals(type)
+        //                            || CompletionStage.class.getSimpleName().contentEquals(type)) {
+        //                        rawType = parameterType;
+        //                    } else {
+        //                        rawType = type;
+        //                    }
+        //                }
+        //                if (rawType.endsWith("Exception")) {
+        //                    System.out.println("skipping: " + rawType);
+        //                    continue;
+        //                }
+        if (PRIMITIVE_WRAPPER_TYPES.containsKey(rawType)) {
+            return PRIMITIVE_WRAPPER_TYPES.get(rawType);
+        }
+        if ("jakarta.ws.rs.core.Response".equals(rawType) || "Response".equals(rawType)) {
+            return "google.protobuf.Any";
+        }
+        // array?
+        Type t = md.getType();
+        ResolvedType rt = t.resolve();
+        resolvedTypes.add(rt.asReferenceType().getTypeDeclaration().get());
+        String type = t.resolve().describe();
+        return fqnifyClass(type, isInnerClass(rt.asReferenceType().getTypeDeclaration().get()));
+        //            }
+        //        }
+        //        needEmpty = true;
+        //        return "gEmpty";
     }
 
     private static boolean isSuspended(MethodDeclaration md) {

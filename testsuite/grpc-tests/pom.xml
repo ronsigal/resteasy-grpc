@@ -29,6 +29,17 @@
         <wildfly.grpc.test.feature.pack.artifactId>wildfly-grpc-feature-pack</wildfly.grpc.test.feature.pack.artifactId>
         <wildfly.grpc.test.feature.pack.version>0.1.0.Final</wildfly.grpc.test.feature.pack.version>
 
+        <!-- Fpr security tests -->
+        <project.conf.dir.security>${project.basedir}/src/test/resources/security/configuration</project.conf.dir.security>
+        <container.base.dir.security>${project.build.directory}/security</container.base.dir.security>
+        <container.conf.dir.security>${container.base.dir.security}/configuration</container.conf.dir.security>
+        
+        <!-- Ports -->
+        <container.management.port.managed>9990</container.management.port.managed>
+        <container.management.port.manual.security>10990</container.management.port.manual.security>
+        <container.offset.manual.security>1000</container.offset.manual.security>
+ 
+
         <!-- For compiling the test project -->
         <root.class>CC1</root.class>
         <servlet.name>GrpcServlet</servlet.name>
@@ -441,6 +452,33 @@
                         <goals>
                             <goal>compile</goal>
                             <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <configuration>
+                    <!--skip>${skipTests}</skip-->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>initialize-configuration</id>
+                        <phase>process-test-classes</phase>
+                        <configuration>
+                            <target>
+                                <delete quiet="true" dir="${container.base.dir.security}" />
+                                <copy todir="${container.base.dir.security}" overwrite="true" failonerror="true">
+                                    <fileset dir="${jboss.home}/standalone"/>
+                                </copy>
+                                <copy todir="${container.conf.dir.security}" overwrite="true" failonerror="true">
+                                    <fileset dir="${project.conf.dir.security}"/>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
                         </goals>
                     </execution>
                 </executions>

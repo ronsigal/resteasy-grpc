@@ -20,7 +20,37 @@
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
     version="6.0">
-    <default-context-path>/grpc-test</default-context-path>
+    <!--default-context-path>/grpc-test</default-context-path>-->
+
+    <!--security-constraint>
+        <web-resource-collection>
+            <web-resource-name>wholesale</web-resource-name>
+            <url-pattern>/acme/wholesale/*</url-pattern>
+            <http-method>GET</http-method>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>PARTNER</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint-->
+
+    <!--security-constraint>
+        <web-resource-collection>
+            <web-resource-name>identity</web-resource-name>
+            <url-pattern>/grpcToJakartaRest/p/identity</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>fam</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint-->
+
     <servlet>
         <servlet-name>GrpcServlet</servlet-name>
         <servlet-class>

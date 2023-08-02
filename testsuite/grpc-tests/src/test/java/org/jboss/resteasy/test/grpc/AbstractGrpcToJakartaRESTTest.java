@@ -135,6 +135,7 @@ abstract class AbstractGrpcToJakartaRESTTest {
         this.testString(stub);
         this.testSuspend(stub);
         this.testCopy(stub);
+        this.testIsSecure(stub);
     }
 
     void doAsyncTest(CC1ServiceStub asyncStub) throws Exception {
@@ -1312,6 +1313,7 @@ abstract class AbstractGrpcToJakartaRESTTest {
     }
 
     void testCopy(CC1ServiceBlockingStub stub) throws Exception {
+        new Exception("copy").printStackTrace();
         CC1_proto.gString n = CC1_proto.gString.newBuilder().setValue("abc").build();
         CC1_proto.GeneralEntityMessage.Builder builder = CC1_proto.GeneralEntityMessage.newBuilder();
         GeneralEntityMessage gem = builder.setURL("http://localhost:8080" + "/p/copy").setGStringField(n).build();
@@ -1322,6 +1324,45 @@ abstract class AbstractGrpcToJakartaRESTTest {
                     .setValue("xyz")
                     .build();
             Assert.assertEquals(expected, response.getGStringField());
+            System.out.println("testCopy() passed");
+        } catch (StatusRuntimeException e) {
+            System.out.println("testCopy() failed");
+            try (StringWriter writer = new StringWriter()) {
+                e.printStackTrace(new PrintWriter(writer));
+                Assert.fail(writer.toString());
+            }
+        }
+        System.out.println("ran copy()");
+    }
+
+    void testIsSecure(CC1ServiceBlockingStub stub) throws Exception {
+        CC1_proto.GeneralEntityMessage.Builder builder = CC1_proto.GeneralEntityMessage.newBuilder();
+        GeneralEntityMessage gem = builder.setURL("http://localhost:8080" + "/p/isSecure").build();
+        GeneralReturnMessage response;
+        try {
+            response = stub.isSecure(gem);
+            CC1_proto.gBoolean expected = dev.resteasy.grpc.example.CC1_proto.gBoolean.newBuilder()
+                    .setValue(false)
+                    .build();
+            System.out.println("isSecure(): " + response.getGBooleanField());
+            Assert.assertEquals(expected, response.getGBooleanField());
+        } catch (StatusRuntimeException e) {
+
+            try (StringWriter writer = new StringWriter()) {
+                e.printStackTrace(new PrintWriter(writer));
+                Assert.fail(writer.toString());
+            }
+        }
+    }
+
+    void testIdentity(CC1ServiceBlockingStub stub) throws Exception {
+        CC1_proto.GeneralEntityMessage.Builder builder = CC1_proto.GeneralEntityMessage.newBuilder();
+        GeneralEntityMessage gem = builder.setURL("http://localhost:8080" + "/p/identity").build();
+        GeneralReturnMessage response;
+        try {
+            response = stub.identity(gem);
+            System.out.println("identity(): " + response.getGStringField());
+            Assert.assertEquals("OK", response.getGStringField());
         } catch (StatusRuntimeException e) {
 
             try (StringWriter writer = new StringWriter()) {

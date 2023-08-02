@@ -302,16 +302,21 @@ public class ServiceGrpcExtender {
             String method, String syncType, StringBuilder sb, String retn) {
         sb.append("      HttpServletRequest request = null;" + LS)
                 .append("      try {" + LS)
+                .append(" System.out.println(\"in body 1\");")
+
                 .append("         HttpServletResponseImpl response = new HttpServletResponseImpl(\"")
                 .append(actualReturnClass)
                 .append("\", \"")
                 .append(syncType)
                 .append("\", ")
-                .append(root)
-                .append("_Server.getServletContext(), builder, fd);" + LS)
+                //                .append(root)
+                //                .append("_Server.getServletContext(\"").append(servletName).append("\"), builder, fd);" + LS)
+                .append("GrpcHttpServletDispatcher.getServletContext(\"").append(servletName).append("\"), builder, fd);" + LS)
                 .append("         GeneratedMessageV3 actualParam = param.")
                 .append(getGetterMethod(actualEntityClass))
                 .append(";" + LS)
+                .append(" System.out.println(\"in body 2\");")
+
                 .append("         request = getHttpServletRequest(param, actualParam, \"")
                 .append(path)
                 .append("\", response, ")
@@ -320,9 +325,17 @@ public class ServiceGrpcExtender {
                 .append("\", \"")
                 .append(actualReturnClass)
                 .append("\");" + LS)
+                .append(" System.out.println(\"in body 3\");")
+
                 .append("         HttpServletDispatcher servlet = getServlet();" + LS)
+                .append(" System.out.println(\"in body 4\");")
+
                 .append("         activateRequestContext();" + LS)
-                .append("         servlet.service(request.getMethod(), request, response);" + LS);
+                .append(" System.out.println(\"in body 5\");")
+
+                .append("         servlet.service(request.getMethod(), request, response);" + LS)
+                .append(" System.out.println(\"in body 6\");");
+
         if ("suspended".equals(syncType)) {
             sb.append("         AsyncMockServletOutputStream amsos = (AsyncMockServletOutputStream) response.getOutputStream();"
                     + LS)
@@ -383,6 +396,7 @@ public class ServiceGrpcExtender {
                     .append("         responseObserver.onNext(grmb.build());" + LS);
         }
         sb.append("      } catch (Exception e) {" + LS)
+                .append("e.printStackTrace();" + LS)
                 .append("         responseObserver.onError(e);" + LS)
                 .append("      } finally {" + LS)
                 .append("         responseObserver.onCompleted();" + LS)
@@ -461,8 +475,24 @@ public class ServiceGrpcExtender {
                 .append("      Map<String, List<String>> headers = convertHeaders(param.getHeadersMap());" + LS)
                 .append("      Cookie[] cookies = convertCookies(param.getCookiesList());" + LS)
                 .append("      String httpMethod = param.getHttpMethod();" + LS)
-                .append("      ServletContext servletContext = getServletContext();" + LS)
+                //                .append("      ServletContext servletContext = ").append(root).append("_Server.getServletContext(\"")
+                .append("      ServletContext servletContext = GrpcHttpServletDispatcher.getServletContext(\"")
+                .append(servletName).append("\");" + LS)
                 .append("      HttpServletRequestImpl request = new HttpServletRequestImpl();" + LS)
+                .append(" System.out.println(\"in getHttpServletRequest():\");" + LS)
+                //                .append("System.out.println(").append(root)
+                //                .append("_Server.getHttpServletRequest(\"").append(servletName).append("\"));"
+                //                        + LS)
+                //
+                //                .append("      request.setHttpServletRequest(").append(root).append("_Server.getHttpServletRequest(\"")
+                .append("Object o = GrpcHttpServletDispatcher.getHttpServletRequest(\"").append(servletName)
+                .append("\");" + LS)
+                .append("System.out.println(o);" + LS)
+                .append("      request.setHttpServletRequest(GrpcHttpServletDispatcher.getHttpServletRequest(\"")
+                .append(servletName).append("\"));" + LS)
+                .append(" System.out.println(\"in getHttpServletRequest() 2\");" + LS)
+
+                .append("      request.setServletName(\"").append(servletName).append("\");" + LS)
                 .append("      request.setServletResponse(response);" + LS)
                 .append("      request.setServletContext(servletContext);" + LS)
                 .append("      request.setUri(url);" + LS)
@@ -495,23 +525,23 @@ public class ServiceGrpcExtender {
                 .append("      }" + LS)
                 .append("      return request;" + LS)
                 .append("   }" + LS + LS);
-        sb.append("   private static ServletContext getServletContext() {" + LS)
-                .append("      ServletContext servletContext = ")
-                .append(root)
-                .append("_Server.getServletContext();" + LS)
-                .append("      if (servletContext == null) {" + LS)
-                //                .append("         Client client = ClientBuilder.newClient();" + LS)
-                //                .append("         Response response = client.target(\"http://localhost:8080/" + artifactIdVersion
-                //                        + "/grpcToJakartaRest/grpcserver/context\").request().get();" + LS)
-                //                .append("         if (200 != response.getStatus()) {" + LS)
-                //                .append("            throw new RuntimeException(Messages.MESSAGES.cantGetServletContext());" + LS)
-                //                .append("         }" + LS)
-                .append("         servletContext = ")
-                .append(root)
-                .append("_Server.getServletContext();" + LS)
-                .append("      }" + LS)
-                .append("      return servletContext;" + LS)
-                .append("   }" + LS + LS);
+        //        sb.append("   private static ServletContext getServletContext() {" + LS)
+        //                .append("      ServletContext servletContext = ")
+        //                .append(root)
+        //                .append("_Server.getServletContext();" + LS)
+        //                .append("      if (servletContext == null) {" + LS)
+        //                //                .append("         Client client = ClientBuilder.newClient();" + LS)
+        //                //                .append("         Response response = client.target(\"http://localhost:8080/" + artifactIdVersion
+        //                //                        + "/grpcToJakartaRest/grpcserver/context\").request().get();" + LS)
+        //                //                .append("         if (200 != response.getStatus()) {" + LS)
+        //                //                .append("            throw new RuntimeException(Messages.MESSAGES.cantGetServletContext());" + LS)
+        //                //                .append("         }" + LS)
+        //                .append("         servletContext = ")
+        //                .append(root)
+        //                .append("_Server.getServletContext(\"").append(root).append("\"));" + LS)
+        //                .append("      }" + LS)
+        //                .append("      return servletContext;" + LS)
+        //                .append("   }" + LS + LS);
         sb.append("   private static jakarta.servlet.http.Cookie[] convertCookies(List<")
                 .append(pkg)
                 .append(".")

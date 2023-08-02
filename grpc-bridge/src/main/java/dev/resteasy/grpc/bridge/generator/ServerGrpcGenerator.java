@@ -42,6 +42,8 @@ class ServerGrpcGenerator {
     public String generate() throws IOException {
         final var file = sourceDir.resolve(packageName.replace('.', File.separatorChar))
                 .resolve(prefix + "_Server.java");
+        if (new File(file.toString()).exists())
+            return "";
         Files.createDirectories(file.getParent());
         try (SourceWriter writer = new SourceWriter(file)) {
             // Write the package name
@@ -50,13 +52,19 @@ class ServerGrpcGenerator {
             // Write the imports
             writer.writeLine("import java.security.AccessController;")
                     .writeLine("import java.security.PrivilegedExceptionAction;")
+                    .writeLine("import java.util.HashMap;")
+                    .writeLine("import java.util.Map;")
                     .writeLine("import java.util.concurrent.TimeUnit;")
                     .writeLine("import java.util.logging.Logger;")
                     .writeLine()
+                    .writeLine("import org.jboss.resteasy.core.ResteasyContext;")
+                    .writeLine()
                     .writeLine("import io.grpc.Server;")
                     .writeLine("import io.grpc.ServerBuilder;")
+                    .writeLine("import jakarta.servlet.ServletConfig;")
                     .writeLine("import jakarta.servlet.ServletContext;")
                     .writeLine("import jakarta.servlet.http.HttpServletRequest;")
+                    .writeLine("import jakarta.servlet.http.HttpServletResponse;")
                     .writeLine("import jakarta.ws.rs.GET;")
                     .writeLine("import jakarta.ws.rs.Path;")
                     .writeLine("import jakarta.ws.rs.core.Context;");
@@ -79,7 +87,14 @@ class ServerGrpcGenerator {
                     "private static final Logger logger = Logger.getLogger(", prefix, "_Server.class.getName());")
                     .writeLine("private static ServletContext servletContext;")
                     .writeLine("private static int PORT = 8082;")
-                    .writeLine("private Server server;");
+                    .writeLine("private Server server;")
+                    //                    .writeLine("private static final Map<String, Servlet> servletMap = new HashMap<String, Servlet>();\n")
+                    .writeLine(
+                            "private static final Map<String, ServletContext> servletContextMap = new HashMap<String, ServletContext>();\n")
+                    .writeLine(
+                            "private static final Map<String, HttpServletRequest> requests = new HashMap<String, HttpServletRequest>();")
+                    .writeLine(
+                            "private static final Map<String, HttpServletResponse> responses = new HashMap<String, HttpServletResponse>();");
 
             // Write the main method
             writer.writeLine("/**")
@@ -92,22 +107,66 @@ class ServerGrpcGenerator {
                     .endBlock();
 
             // The static servlet context
-            writer.startBlock("public static ServletContext getServletContext() {")
-                    .writeLine("return servletContext;")
+            writer.startBlock("public static ServletContext getServletContext(String name) {")
+                    .writeLine("System.out.println(\"*_Server.getServletContext() 1: \" + name);")
+                    .writeLine("servletContextMap.get(name);")
+                    .writeLine("System.out.println(\"*_Server.getServletContext() 2: \" + name);")
+                    .writeLine("System.out.println(servletContextMap);")
+
+                    .writeLine("System.out.println(servletContextMap.get(name));")
+                    .writeLine("return servletContextMap.get(name);")
+                    .endBlock();
+            //       System.out.println("request for " + name + ": "  + requests.get(name))
+            // Get HttpServletRequesst
+            writer.startBlock("public static HttpServletRequest getHttpServletRequest(String name) {")
+                    .writeLine("System.out.println(\"in *_Server.getHttpServletRequest(): \" + name);")
+                    .writeLine("System.out.println(requests.size());")
+                    .writeLine("System.out.println(requests.keySet());")
+                    //                    .writeLine("System.out.println(requests.values());")
+                    //                    .writeLine("System.out.println(requests.values().iterator().next());")
+                    //
+                    //                    .writeLine("System.out.println(requests);")
+                    //                    .writeLine("System.out.println(\"got requests);\");")
+                    .writeLine("System.out.println(requests.get(name));")
+                    .writeLine("System.out.println(\"returning\");")
+                    .writeLine("return requests.get(name);")
                     .endBlock();
 
             writer.writeLine("@Path(\"context\")")
                     .writeLine("@GET")
-                    .startBlock("public String startContext(@Context HttpServletRequest request) throws Exception {")
-                    .writeLine("servletContext = request.getServletContext();")
-                    .writeLine("return \"Got \" + this + \" servletContext\";")
+                    .startBlock(
+                            "public String startContext(@Context HttpServletRequest request, @Context ServletConfig servletConfig) throws Exception {")
+                    .writeLine("new Exception().printStackTrace();")
+                    .writeLine("System.out.println(ResteasyContext.getContextData(HttpServletRequest.class));")
+                    .writeLine("System.out.println(ResteasyContext.getContextData(HttpServletRequest.class).getClass());")
+                    .writeLine(
+                            "        System.out.println(\"in *_Server.startContext(): \" + servletConfig.getServletName());\n")
+                    .writeLine("System.out.println(servletConfig.getServletName());")
+                    .writeLine("System.out.println(request);")
+                    .writeLine("System.out.println(request.getClass());")
+                    .writeLine("System.out.println(servletConfig.getServletName());")
+                    .writeLine("System.out.println(servletConfig.getServletContext().getContextPath());")
+                    .writeLine("servletContextMap.put(servletConfig.getServletName(), request.getServletContext());")
+                    .writeLine(
+                            "requests.put(servletConfig.getServletName(), ResteasyContext.getContextData(HttpServletRequest.class));")
+                    .writeLine("System.out.println(requests.get(servletConfig.getServletName()));")
+                    .writeLine(
+                            "HttpServletRequest r = (HttpServletRequest)ResteasyContext.getContextData(HttpServletRequest.class);")
+                    .writeLine("System.out.println(r.isSecure());")
+                    //                    .writeLine("r.login(\"ron\", \"pw\");")
+                    //                    .writeLine("for (String name : servletContext.getServletRegistrations().keySet()) {")
+                    //                    .writeLine(
+                    //                            "System.out.println(name + \": \" + servletContext.getServletRegistrations().get(name).getName());")
+                    //                    .writeLine("}")
+                    .writeLine("return \"Got \" + this + \": \" + servletConfig.getServletName() + \" servletContext\";")
                     .endBlock()
                     .writeLine();
 
             writer.writeLine("@Path(\"start\")")
                     .writeLine("@GET")
-                    .startBlock("public String startGRPC(@Context HttpServletRequest request) throws Exception {")
-                    .writeLine("servletContext = request.getServletContext();")
+                    .startBlock(
+                            "public String startGRPC(@Context HttpServletRequest request,  @Context ServletConfig servletConfig) throws Exception {")
+                    .writeLine("startContext(request, servletConfig);")
                     .writeLine("final ", prefix, "_Server server = new ", prefix, "_Server();")
                     .startBlock("new Thread() {")
                     .writeLine("@SuppressWarnings({\"deprecation\", \"removal\"})")

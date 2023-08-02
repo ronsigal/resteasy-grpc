@@ -72,4 +72,6 @@ public interface Messages {
     @Message(id = 21560, value = "Response %s was not original or a wrapper")
     IllegalArgumentException responseWasNotOriginalOrWrapper(ServletResponse response);
 
+    @Message(id = 21565, value = "Servlet %s not recognized")
+    IllegalArgumentException servletNotRecognized(String servletName);
 }

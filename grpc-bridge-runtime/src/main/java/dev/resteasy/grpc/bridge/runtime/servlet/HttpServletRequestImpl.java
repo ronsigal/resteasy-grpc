@@ -76,6 +76,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
     public static final String GRPC_RETURN_RESPONSE = "grpc-return-response";
     public static final String LOCATOR = "LOCATOR";
 
+    private String servletName;
+    private HttpServletRequest delegate;
     private ServletResponse servletResponse;
     private String uri;
     private String contextPath;
@@ -93,6 +95,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
     private boolean gotInputStream = false;
     private boolean gotReader = false;
     private boolean readStarted;
+    private Object lock = new Object();
 
     // servlet info
     private String characterEncoding;
@@ -108,6 +111,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
             final String uri, final String path, final String method, final ServletInputStream sis, final String retn,
             final Map<String, List<String>> headers,
             final Cookie[] cookies, final Map<String, String[]> formParameters) throws URISyntaxException {
+        new Exception("HttpServletRequestImpl 1").printStackTrace();
         this.servletResponse = servletResponse;
         this.servletContext = servletContext;
         setUri(uri);
@@ -136,6 +140,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
     }
 
     public HttpServletRequestImpl() {
+        new Exception("HttpServletRequestImpl 2").printStackTrace();
         List<String> acceptList = new ArrayList<String>();
         acceptList.add("application/grpc-jaxrs");
         acceptList.add("*/*;grpc-jaxrs=true");
@@ -144,6 +149,11 @@ public class HttpServletRequestImpl implements HttpServletRequest {
         List<String> contentTypeList = new ArrayList<String>();
         contentTypeList.add("*/*;grpc-jaxrs=true");
         headers.put("Content-Type", contentTypeList);
+    }
+
+    @Override
+    public String toString() {
+        return "dev.resteasy.grpc.bridge.runtime.servlet.HttpServletRequestImpl[" + delegate + "]";
     }
 
     @Override
@@ -311,7 +321,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public boolean isSecure() {
-        throw new NotSupportedException(Messages.MESSAGES.isNotImplemented("isSecure()"));
+        getHttpServletRequest();
+        return delegate.isSecure();
     }
 
     @Override
@@ -420,7 +431,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public String getAuthType() {
-        throw new NotSupportedException(Messages.MESSAGES.isNotImplemented("getAuthType()"));
+        getHttpServletRequest();
+        return delegate.getAuthType();
     }
 
     @Override
@@ -496,17 +508,20 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public String getRemoteUser() {
-        throw new NotSupportedException(Messages.MESSAGES.isNotImplemented("getRemoteUser()"));
+        getHttpServletRequest();
+        return delegate.getRemoteUser();
     }
 
     @Override
     public boolean isUserInRole(String role) {
-        throw new NotSupportedException(Messages.MESSAGES.isNotImplemented("isUserInRole()"));
+        getHttpServletRequest();
+        return delegate.isUserInRole(role);
     }
 
     @Override
     public Principal getUserPrincipal() {
-        throw new NotSupportedException(Messages.MESSAGES.isNotImplemented("getUserPrincipal()"));
+        getHttpServletRequest();
+        return delegate.getUserPrincipal();
     }
 
     @Override
@@ -583,17 +598,20 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
-        throw new NotSupportedException(Messages.MESSAGES.isNotImplemented("authenticate()"));
+        getHttpServletRequest();
+        return delegate.authenticate(response);
     }
 
     @Override
     public void login(String username, String password) throws ServletException {
-        throw new NotSupportedException(Messages.MESSAGES.isNotImplemented("login()"));
+        getHttpServletRequest();
+        delegate.login(username, password);
     }
 
     @Override
     public void logout() throws ServletException {
-        throw new NotSupportedException(Messages.MESSAGES.isNotImplemented("logout()"));
+        getHttpServletRequest();
+        delegate.logout();
     }
 
     @Override
@@ -749,6 +767,10 @@ public class HttpServletRequestImpl implements HttpServletRequest {
         this.servletContext = servletContext;
     }
 
+    public void setServletName(String servletName) {
+        this.servletName = servletName;
+    }
+
     public void setAsyncStarted(boolean asyncStarted) {
         this.asyncStarted = asyncStarted;
     }
@@ -768,6 +790,11 @@ public class HttpServletRequestImpl implements HttpServletRequest {
             list.add("true");
             headers.put(GRPC_RETURN_RESPONSE, list);
         }
+    }
+
+    public void setHttpServletRequest(HttpServletRequest request) {
+        System.out.println("setting delegate: " + request);
+        delegate = request;
     }
 
     private String getCharacterEncodingFromHeader() {
@@ -891,5 +918,19 @@ public class HttpServletRequestImpl implements HttpServletRequest {
             uriInfo = new ResteasyUriInfo(u, servletContext.getContextPath());
         }
         return uriInfo;
+    }
+
+    private void getHttpServletRequest() {
+        System.out.println("delegate: " + delegate);
+        //        if (delegate == null) {
+        //            synchronized (lock) {
+        //                if (delegate == null) {
+        //                    delegate = GrpcHttpServletDispatcher.getHttpServletRequest(servletName);
+        //                    if (delegate == null) {
+        //                        throw new IllegalStateException(Messages.MESSAGES.servletNotRecognized(servletName));
+        //                    }
+        //                }
+        //            }
+        //        }
     }
 }

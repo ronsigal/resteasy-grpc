@@ -3,12 +3,54 @@
         http://jboss.org/schema/arquillian
         http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
     <defaultProtocol type="Servlet 5.0" />
-    <group qualifier="integration-tests" default="true">
+    <group qualifier="grpc-tests" default="true">
         <container qualifier="default" default="true">
             <configuration>
                 <property name="jbossHome">${jboss.home}</property>
                 <property name="jbossArguments">${securityManagerArg}</property>
                 <property name="javaVmArguments">${debugJvmArgs} -server -Xms256m -Xmx1G</property>
+                <property name="managementPort">${container.management.port.managed}</property>
+            </configuration>
+        </container>
+        <container qualifier="jbossas-manual-gzip" mode="manual">
+            <configuration>
+                <property name="jbossHome">${jboss.home}</property>
+                <property name="jbossArguments">${securityManagerArg}</property>
+                <property name="serverConfig">${jboss.server.config.file.name:standalone-full.xml}</property>
+                <property name="javaVmArguments">-server -Xms256m -Xmx1G -Djboss.bind.address=${node} -Djboss.bind.address.management=${node} -Dnode=${node} -Dipv6=${ipv6} ${additionalJvmArgs} ${ipv6ArquillianSettings} ${jacoco.agent} -Djboss.socket.binding.port-offset=${container.offset.manual.gzip} -Dresteasy.allowGzip=true -Djboss.server.base.dir=${container.base.dir.manual.gzip}
+                </property>
+                <property name="managementAddress">${node}</property>
+                <property name="managementPort">10990</property>
+            </configuration>
+        </container>
+
+        <container qualifier="security" mode="manual">
+            <configuration>
+                <property name="jbossHome">${jboss.home}</property>
+                <property name="jbossArguments">${securityManagerArg}</property>
+                <!--property name="javaVmArguments">${debugJvmArgs} -server -Xms256m -Xmx1G</property-->
+                <!--property name="javaVmArguments">-server -Xms256m -Xmx1G -Djboss.bind.address=${node}
+                 -Djboss.bind.address.management=${node} -Dnode=${node} -Dipv6=${ipv6} ${additionalJvmArgs}
+                  ${ipv6ArquillianSettings} ${jacoco.agent} -Djboss.socket.binding.port-offset=${container.offset.manual.security}
+                   -Djboss.server.base.dir=${container.base.dir.security}</property-->
+                <property name="javaVmArguments">-server -Xms256m -Xmx1G
+                   -Djboss.socket.binding.port-offset=${container.offset.manual.security}
+                   -Djboss.server.base.dir=${container.base.dir.security}
+                   -Djboss.server.config.dir=${container.conf.dir.security}</property>
+
+                <!--property name="jboss.server.config.dir">/home/rsigal/tmp/grpc.071523/resteasy-grpc/testsuite/grpc-tests/target/security</property-->
+                <property name="managementPort">${container.management.port.manual.security}</property>
+                <property name="jboss.server.base.dir">${container.base.dir.security}</property>
+                <property name="jboss.server.config.dir">${container.conf.dir.security}</property>
+                <!--
+               <property name="jbossHome">${jboss.home}</property>
+                <property name="jbossArguments">${securityManagerArg}</property>
+                <property name="serverConfig">${jboss.server.config.file.name:standalone-full.xml}</property>
+                <property name="javaVmArguments">-server -Xms256m -Xmx1G -Djboss.bind.address=${node} -Djboss.bind.address.management=${node} -Dnode=${node} -Dipv6=${ipv6} ${additionalJvmArgs} ${ipv6ArquillianSettings} ${jacoco.agent} -Djboss.socket.binding.port-offset=${container.offset.manual.gzip} -Dresteasy.allowGzip=true -Djboss.server.base.dir=${container.base.dir.manual.gzip}
+                </property>
+                <property name="managementAddress">${node}</property>
+                <property name="managementPort">${container.management.port.manual.gzip}</property>
+                 -->
             </configuration>
         </container>
     </group>
