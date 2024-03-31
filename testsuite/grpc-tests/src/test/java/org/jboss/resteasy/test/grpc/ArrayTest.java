@@ -10,12 +10,19 @@ import dev.resteasy.grpc.arrays.Array_proto.dev_resteasy_grpc_arrays___ArrayHold
 import dev.resteasy.grpc.arrays.Array_proto.dev_resteasy_grpc_arrays___IntArray;
 import dev.resteasy.grpc.arrays.Array_proto.dev_resteasy_grpc_arrays___StringArray;
 import dev.resteasy.grpc.bridge.runtime.protobuf.JavabufTranslator;
-import dev.resteasy.grpc.example.CC1JavabufTranslator;
 import dev.resteasy.grpc.example.CC2;
 
 public class ArrayTest {
 
-    private JavabufTranslator translator = new CC1JavabufTranslator();
+    static private JavabufTranslator translator;
+
+    static {
+        try {
+            translator = (JavabufTranslator) Class.forName("dev.resteasy.grpc.example.CC1JavabufTranslator").newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("can't create CC1JavabufTranslator");
+        }
+    }
 
     @Test
     public void single_boolean_empty() throws Exception {

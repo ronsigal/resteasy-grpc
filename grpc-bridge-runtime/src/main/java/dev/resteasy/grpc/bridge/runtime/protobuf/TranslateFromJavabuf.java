@@ -48,6 +48,11 @@ public interface TranslateFromJavabuf {
     Object assignFromJavabuf(Message message);
 
     /**
+     * Copies the contents of a {@code com.google.protobuf.Message} into a new instance of the target class.
+     */
+    Object assignFromJavabuf(Message message, Object outer);
+
+    /**
      * Copies the contents of a {@code com.google.protobuf.Message} into {@code obj}, an instance of the target class.
      */
     void assignExistingFromJavabuf(Message message, Object obj);

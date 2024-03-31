@@ -64,6 +64,7 @@ public class ReaderWriterGenerator {
             logger.info("  arg[2]: .proto file prefix");
             return;
         }
+        System.out.println("starting ReaderWriterGenerator");
         try {
             String readerWriterClass = args[2] + "_MessageBodyReaderWriter";
             Class<?> wrapperClass = Class.forName(args[1], true, Thread.currentThread().getContextClassLoader());

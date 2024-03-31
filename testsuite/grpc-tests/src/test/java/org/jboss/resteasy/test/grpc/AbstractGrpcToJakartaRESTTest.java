@@ -6,10 +6,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 
 import jakarta.ws.rs.client.Client;
@@ -56,7 +56,9 @@ import dev.resteasy.grpc.example.CC1_proto.gHeader;
 import dev.resteasy.grpc.example.CC1_proto.gInteger;
 import dev.resteasy.grpc.example.CC1_proto.gNewCookie;
 import dev.resteasy.grpc.example.CC1_proto.gString;
+import dev.resteasy.grpc.example.CC1_proto.java_util___ArrayList;
 import dev.resteasy.grpc.example.CC1_proto.java_util___HashMap;
+import dev.resteasy.grpc.example.CC1_proto.java_util___HashSet;
 import dev.resteasy.grpc.example.ExampleApp;
 import dev.resteasy.grpc.example.sub.CC8;
 import io.grpc.StatusRuntimeException;
@@ -169,14 +171,17 @@ abstract class AbstractGrpcToJakartaRESTTest {
         this.testArraysInts1Translator(stub);
         this.testArraysInts2(stub);
         this.testArraysInts5(stub);
-        //        this.testArrayStuff(stub);
-        //        this.testArrayStuffArray(stub);
+        this.testArrayStuff(stub);
+        this.testArrayStuffArray(stub);
         this.doCollectionTests(stub);
     }
 
     void doCollectionTests(CC1ServiceBlockingStub stub) throws Exception {
+        this.testArrayList(stub);
+        this.testHashsetInteger(stub);
+        this.testHashSetArrayStuff(stub);
         this.testHashMapInteger(stub);
-        //        this.testHashMapArrayStuff(stub);
+        this.testHashMapArrayStuff(stub);
     }
 
     void doAsyncTest(CC1ServiceStub asyncStub) throws Exception {
@@ -835,11 +840,13 @@ abstract class AbstractGrpcToJakartaRESTTest {
         GeneralEntityMessage gem = messageBuilder.build();
         try {
             GeneralReturnMessage response = stub.getResponse(gem);
+            //                dev_resteasy_grpc_example___CC3 cc3 = dev_resteasy_grpc_example___CC3.newBuilder().setS("cc7").build();
             dev_resteasy_grpc_example___CC7 cc7 = dev_resteasy_grpc_example___CC7.newBuilder()
                     .setM(11)
                     .setS("cc7")
                     .build();
             Any any = response.getGoogleProtobufAnyField();
+            //                        .setCC3Super(cc3)
             Assert.assertEquals(cc7, any.unpack(dev_resteasy_grpc_example___CC7.class));
         } catch (StatusRuntimeException e) {
 
@@ -964,8 +971,7 @@ abstract class AbstractGrpcToJakartaRESTTest {
         CC1_proto.dev_resteasy_grpc_bridge_runtime_sse___SseEvent sseEvent = list.get(3);
         Assert.assertEquals("name4", sseEvent.getName());
         Any any = sseEvent.getData();
-        dev_resteasy_grpc_example___CC5 cc5 = (dev_resteasy_grpc_example___CC5) any
-                .unpack(dev_resteasy_grpc_example___CC5.class);
+        dev_resteasy_grpc_example___CC5 cc5 = any.unpack(dev_resteasy_grpc_example___CC5.class);
         Assert.assertEquals(dev_resteasy_grpc_example___CC5.newBuilder().setK(4).build(), cc5);
     }
 
@@ -1669,6 +1675,71 @@ abstract class AbstractGrpcToJakartaRESTTest {
     ////////////////////////////////
     ///     Collection tests     ///
     ////////////////////////////////
+    void testArrayList(CC1ServiceBlockingStub stub) throws Exception {
+        ArrayList<Object> list = new ArrayList<Object>();
+        list.add(Integer.valueOf(3));
+        list.add(new ArrayStuff(false));
+        list.add(Integer.valueOf(5));
+        java_util___ArrayList jblist = (java_util___ArrayList) translator.translateToJavabuf(list);
+        GeneralEntityMessage.Builder builder = GeneralEntityMessage.newBuilder();
+        GeneralEntityMessage gem = builder.setJavaUtilArrayListField(jblist).build();
+        GeneralReturnMessage response;
+        try {
+            response = stub.listArray(gem);
+            jblist = response.getJavaUtilArrayListField();
+            Assert.assertEquals(list, (ArrayList) translator.translateFromJavabuf(jblist));
+        } catch (StatusRuntimeException e) {
+            try (StringWriter writer = new StringWriter()) {
+                e.printStackTrace(new PrintWriter(writer));
+                Assert.fail(writer.toString());
+            }
+        }
+    }
+
+    void testHashSetArrayStuff(CC1ServiceBlockingStub stub) throws Exception {
+        HashSet<ArrayStuff> set = new HashSet<ArrayStuff>();
+        set.add(new ArrayStuff(false));
+        set.add(new ArrayStuff(true));
+        java_util___HashSet jbset = (java_util___HashSet) translator.translateToJavabuf(set);
+        GeneralEntityMessage.Builder builder = GeneralEntityMessage.newBuilder();
+        GeneralEntityMessage gem = builder.setJavaUtilHashSetField(jbset).build();
+        GeneralReturnMessage response;
+        try {
+            response = stub.hashset(gem);
+            jbset = response.getJavaUtilHashSetField();
+            HashSet<ArrayStuff> set2 = (HashSet<ArrayStuff>) translator.translateFromJavabuf(jbset);
+            Assert.assertEquals(2, set2.size());
+            for (ArrayStuff as : set) {
+                Assert.assertTrue(set2.contains(as));
+            }
+        } catch (StatusRuntimeException e) {
+            try (StringWriter writer = new StringWriter()) {
+                e.printStackTrace(new PrintWriter(writer));
+                Assert.fail(writer.toString());
+            }
+        }
+    }
+
+    void testHashsetInteger(CC1ServiceBlockingStub stub) throws Exception {
+        HashSet<Integer> set = new HashSet<Integer>();
+        set.add(Integer.valueOf(3));
+        set.add(Integer.valueOf(5));
+        java_util___HashSet jbset = (java_util___HashSet) translator.translateToJavabuf(set);
+        GeneralEntityMessage.Builder builder = GeneralEntityMessage.newBuilder();
+        GeneralEntityMessage gem = builder.setJavaUtilHashSetField(jbset).build();
+        GeneralReturnMessage response;
+        try {
+            response = stub.hashset(gem);
+            jbset = response.getJavaUtilHashSetField();
+            Assert.assertEquals(set, (HashSet) translator.translateFromJavabuf(jbset));
+        } catch (StatusRuntimeException e) {
+            try (StringWriter writer = new StringWriter()) {
+                e.printStackTrace(new PrintWriter(writer));
+                Assert.fail(writer.toString());
+            }
+        }
+    }
+
     void testHashMapInteger(CC1ServiceBlockingStub stub) throws Exception {
         HashMap<Integer, String> map = new HashMap<Integer, String>();
         map.put(Integer.valueOf(3), "three");
@@ -1681,27 +1752,13 @@ abstract class AbstractGrpcToJakartaRESTTest {
         try {
             response = stub.hashmap(gem);
             jbmap = response.getJavaUtilHashMapField();
-            HashMap<Integer, String> map2 = (HashMap) translator.translateFromJavabuf(jbmap);
-            System.out.println("map2: " + map2);
-            //            Assert.assertEquals(map, (HashMap) translator.translateFromJavabuf(jbmap));
-            Assert.assertEquals(map.size(), map2.size());
-            for (Entry<Integer, String> e : map2.entrySet()) {
-                System.out.println(e);
-                System.out.println(e.getKey().getClass() + ", " + e.getValue().getClass());
-            }
-            //            for (int key : map.keySet()) {
-            //                Assert.assertEquals(map.get(key), map2.get(key));
-            //            }
-            for (int key : map2.keySet()) {
-                Assert.assertEquals(map.get(key), map2.get(key));
-            }
+            Assert.assertEquals(map, (HashMap) translator.translateFromJavabuf(jbmap));
         } catch (StatusRuntimeException e) {
             try (StringWriter writer = new StringWriter()) {
                 e.printStackTrace(new PrintWriter(writer));
                 Assert.fail(writer.toString());
             }
         }
-
     }
 
     void testHashMapArrayStuff(CC1ServiceBlockingStub stub) throws Exception {
@@ -1722,7 +1779,6 @@ abstract class AbstractGrpcToJakartaRESTTest {
                 Assert.fail(writer.toString());
             }
         }
-
     }
 
     //////////////////////////////

@@ -51,6 +51,15 @@ public final class Utility {
         // restrict instantiation
     }
 
+    public static Message extractFromAny(Any any, JavabufTranslator translator) {
+        try {
+            Class clazz = extractClassFromAny(any, translator);
+            return any.unpack(clazz);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static Class<?> extractClassFromAny(Any any, JavabufTranslator translator) throws Exception {
         String s = extractStringTypeFromAny(any);
         if (s == "" || s == null) {
@@ -241,6 +250,9 @@ public final class Utility {
 
     public static Field getField(Class<?> clazz, String name) {
         Class<?> c = clazz;
+        if (name.endsWith("_")) {
+            name = name.substring(0, name.length() - 1);
+        }
         while (c != null) {
             try {
                 Field field = c.getDeclaredField(name);

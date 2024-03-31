@@ -741,6 +741,12 @@ public class CC1 {
         return ass;
     }
 
+    @GET
+    @Path("arrays/objects")
+    public Object[] objects(Object[] os) {
+        return os;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////
     ////////////////////               collection tests                ////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -757,11 +763,13 @@ public class CC1 {
     @GET
     @Path("list/arraylist")
     public ArrayList listArray(ArrayList list) {
-        ArrayList newList = new ArrayList();
-        for (int i = 0; i < list.size(); i++) {
-            newList.add(((int) list.get(i)) + 1);
-        }
-        return newList;
+        System.out.println("listArray(): " + list.size());
+        //        ArrayList newList = new ArrayList();
+        //        for (int i = 0; i < list.size(); i++) {
+        //            newList.add(((int) list.get(i)) + 1);
+        //        }
+        //        return newList;
+        return list;
     }
 
     @GET
@@ -774,5 +782,11 @@ public class CC1 {
     @Path("map/hashmap")
     public HashMap hashmap(HashMap map) {
         return map;
+    }
+
+    @GET
+    @Path("AS")
+    public AS as(AS as) {
+        return as;
     }
 }
