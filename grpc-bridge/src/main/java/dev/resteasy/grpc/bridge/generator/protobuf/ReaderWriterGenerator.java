@@ -64,7 +64,6 @@ public class ReaderWriterGenerator {
             logger.info("  arg[2]: .proto file prefix");
             return;
         }
-        System.out.println("starting ReaderWriterGenerator");
         try {
             String readerWriterClass = args[2] + "_MessageBodyReaderWriter";
             Class<?> wrapperClass = Class.forName(args[1], true, Thread.currentThread().getContextClassLoader());
@@ -351,16 +350,12 @@ public class ReaderWriterGenerator {
     }
 
     private static String originalClassName(String s) {
-        System.out.println("originalClassName(feb): s: " + s);
         int i = s.indexOf("$");
         int j = s.lastIndexOf("___");
         j = j < 0 ? s.indexOf("_INNER_") : j;
         j = j < 0 ? s.indexOf("_HIDDEN_") : j;
         j = j < 0 ? s.length() : j;
         String pkg = s.substring(i + 1, j).replace('_', '.');
-        System.out.println("originalClassName(feb): pkg: " + pkg);
-        System.out.println("originalClassName(feb): originalSimpleName(): " + originalSimpleName(s));
-        System.out.println("originalClassName(feb): returning: " + pkg + "." + originalSimpleName(s));
         return pkg + "." + originalSimpleName(s);
     }
 

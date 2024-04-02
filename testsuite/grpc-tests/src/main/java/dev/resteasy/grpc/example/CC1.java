@@ -47,24 +47,6 @@ import org.jboss.resteasy.plugins.providers.sse.OutboundSseEventImpl;
 @Path("p")
 public class CC1 {
 
-    //    public static class Test {
-    //        int Abc;
-    //        int xYZ;
-    //        int pqr;
-    //        int RST_;
-    //        int cde;
-    //        int cde_;
-    //        int cde__;
-    //        int cde___;
-    //        int cde____;
-    //    }
-    //
-    //    @Path("t")
-    //    @GET
-    //    Test test() {
-    //        return new Test();
-    //    }
-
     @Path("list")
     @GET
     public List list(ArrayList list) {
@@ -429,14 +411,6 @@ public class CC1 {
         return "m5";
     }
 
-    //   @Path("m6")
-    //   @POST
-    //   public CC4 m6(CC2 cc2) {
-    //      CC5 cc5 = new CC5(cc2.j);
-    //      System.out.println("cc2.s: " + cc2.s + ", cc5.k: " + cc5.k);
-    //      return new CC4(cc2.s, cc5);
-    //   }
-
     @Path("m7")
     @POST
     public CC6 m7(int i) {
@@ -629,7 +603,6 @@ public class CC1 {
         @POST
         @Path("post/{p}")
         public String post(@PathParam("p") String p, String entity) {
-            System.out.println("entity: '" + entity + "'");
             return p + "|" + entity;
         }
     }
@@ -763,12 +736,6 @@ public class CC1 {
     @GET
     @Path("list/arraylist")
     public ArrayList listArray(ArrayList list) {
-        System.out.println("listArray(): " + list.size());
-        //        ArrayList newList = new ArrayList();
-        //        for (int i = 0; i < list.size(); i++) {
-        //            newList.add(((int) list.get(i)) + 1);
-        //        }
-        //        return newList;
         return list;
     }
 
@@ -782,11 +749,5 @@ public class CC1 {
     @Path("map/hashmap")
     public HashMap hashmap(HashMap map) {
         return map;
-    }
-
-    @GET
-    @Path("AS")
-    public AS as(AS as) {
-        return as;
     }
 }

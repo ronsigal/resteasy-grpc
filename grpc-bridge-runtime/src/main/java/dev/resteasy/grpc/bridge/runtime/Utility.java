@@ -123,28 +123,6 @@ public final class Utility {
         }
     }
 
-    /*
-     * var lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
-     * VarHandle MODIFIERS = lookup.findVarHandle(Field.class, "modifiers", int.class);
-     *
-     * var emptyElementDataField = ArrayList.class.getDeclaredField("EMPTY_ELEMENTDATA");
-     * // make field non-final
-     * MODIFIERS.set(emptyElementDataField, emptyElementDataField.getModifiers() & ~Modifier.FINAL);
-     *
-     * // set field to new value
-     * emptyElementDataField.setAccessible(true);
-     * emptyElementDataField.set(null, new Object[] {"Hello", "World!"});
-     *
-     * var list = new ArrayList<>(0);
-     *
-     * // println uses toString(), and ArrayList.toString() indirectly relies on 'size'
-     * var sizeField = ArrayList.class.getDeclaredField("size");
-     * sizeField.setAccessible(true);
-     * sizeField.set(list, 2); // the new "empty element data" has a length of 2
-     *
-     * System.out.println(list);
-     */
-
     public static void setField(Field field, Object object, Object value, JavabufTranslator translator) throws Exception {
         if (Modifier.isFinal(field.getModifiers())) {
             if (Modifier.isStatic(field.getModifiers())) {
@@ -157,42 +135,7 @@ public final class Utility {
             // make field non-final
             MODIFIERS.set(field, field.getModifiers() & ~Modifier.FINAL);
             field.setAccessible(true);
-            //            field.set(object, value);
-            //            return;
-
-            //            return;
-            //           field.setAccessible(true);
-            //           Field modifiersField = Field.class.getDeclaredField("modifiers");
-            //           modifiersField.setAccessible(true);
-            //           modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            //           System.out.println(Modifier.isFinal(field.getModifiers()));
-            //            Method getDeclaredFields0 = Class.class.getDeclaredMethod("getDeclaredFields0", boolean.class);
-            //            getDeclaredFields0.setAccessible(true);
-            //            Field[] fields = (Field[]) getDeclaredFields0.invoke(Field.class, false);
-            //            Field modifiers = null;
-            //            for (Field each : fields) {
-            //                if ("modifiers".equals(each.getName())) {
-            //                    //                    System.out.println(field.get(Field.class));
-            //                    //                    each.setAccessible(true);
-            //                    //                    System.out.println(each.get(Field.class));
-            //                    //                    System.out.println("before: " + each.getInt(Field.class));
-            //                    //                    each.setInt(Field.class, each.getModifiers() & ~Modifier.FINAL);
-            //                    //                    System.out.println("after: " + each.getInt(Field.class));
-            //                    modifiers = each;
-            //                    break;
-            //                }
-            //            }
-            //            modifiers.setAccessible(true);
-            //            System.out.println(modifiers.get(field));
-            //            int m = field.getModifiers() & ~Modifier.FINAL;
-            //            modifiers.setInt(field, m);
-            //            //           modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            //            //           System.out.println(Modifier.isFinal(field.getModifiers()));
-            //            //           assertNotNull(modifiers);
-            //            //           System.out.println("modifiers after: " + modifiers);
         }
-        //        System.out.println("setField(): " + value.getClass());
-        //        Class<?> ufai = UnsafeFieldAccessorImpl.class;
         field.setAccessible(true);
         if (value == null) {
             field.set(object, value);
@@ -200,14 +143,10 @@ public final class Utility {
             if (field.getType().getComponentType().isPrimitive()) {
                 field.set(object, value);
             } else {
-                System.out.println(object);
                 field.set(object, wrapArray(value));
-                System.out.println(object);
-
             }
         } else if (Any.class.equals(value.getClass())) {
             Any any = (Any) value;
-            System.out.println(any.getSerializedSize());
             if (any.getSerializedSize() == 0) {
                 field.set(object, null);
             } else {
@@ -218,7 +157,6 @@ public final class Utility {
             }
         } else {
             field.setAccessible(true);
-            System.out.println("field: " + field.getName());
             field.set(object, value);
         }
     }
