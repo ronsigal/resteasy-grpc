@@ -19,4 +19,8 @@ public interface JavabufTranslator {
     Class translatefromJavabufClass(String classname);
 
     String getOuterClassname();
+
+    boolean getUseSparseArrays();
+
+    void setUseSparseArrays(boolean b);
 }

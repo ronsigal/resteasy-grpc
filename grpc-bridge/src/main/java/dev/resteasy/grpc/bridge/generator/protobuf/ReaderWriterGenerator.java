@@ -132,7 +132,11 @@ public class ReaderWriterGenerator {
                     || "FormMap".equals(clazz.getSimpleName())
                     || "FormValues".equals(clazz.getSimpleName())) {
                 sb.append("import ").append(clazz.getName().replace("$", ".")).append(";" + LS);
-            } else if (clazz.getName().contains("_HIDDEN_") || clazz.getName().endsWith("ELEMENT_WRAPPER")) {
+            } else if (clazz.getName().contains("_HIDDEN_")
+                    || clazz.getName().endsWith("ELEMENT_WRAPPER")
+                    || clazz.getName().endsWith("ELEMENT_WRAPPER_Array")
+                    || clazz.getName().endsWith("SparseArrayArray")
+                    || clazz.getName().endsWith("SparseArray")) {
                 sb.append("import ").append(clazz.getName().replace("$", ".")).append(";" + LS);
             } else {
                 sb.append("import ").append(clazz.getName().replace("$", ".")).append(";" + LS);
@@ -151,7 +155,7 @@ public class ReaderWriterGenerator {
                 .append("public class ")
                 .append(args[2])
                 .append("MessageBodyReaderWriter implements MessageBodyReader<Object>, MessageBodyWriter<Object> {" + LS + LS)
-                .append("   static JavabufTranslator translator = new " + args[2] + "JavabufTranslator();" + LS + LS)
+                .append("   static JavabufTranslator translator = " + args[2] + "JavabufTranslator.INSTANCE;" + LS + LS)
                 .append("   @Override" + LS)
                 .append("   public boolean isReadable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {"
                         + LS)

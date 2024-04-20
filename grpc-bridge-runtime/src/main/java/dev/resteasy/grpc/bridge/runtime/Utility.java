@@ -92,7 +92,22 @@ public final class Utility {
     }
 
     public static String getJavaClassname(String classname) {
-        String javaClassname = classname.replace("___", ".");
+        return getJavaClassname0(classname, "$");
+    }
+
+    public static String getCanonicalJavaClassname(String classname) {
+        return getJavaClassname0(classname, ".");
+    }
+
+    static String getJavaClassname0(String classname, String replace) {
+        String javaClassname = classname;
+        if (classname.indexOf("___") >= 0) {
+            javaClassname = classname.replace("___", replace);
+        } else if (classname.indexOf("_INNER_") >= 0) {
+            javaClassname = classname.replace("_INNER_", replace);
+        } else if (classname.indexOf("_HIDDEN_") >= 0) {
+            javaClassname = classname.replace("_HIDDEN_", replace);
+        }
         return javaClassname.replace('_', '.');
     }
 

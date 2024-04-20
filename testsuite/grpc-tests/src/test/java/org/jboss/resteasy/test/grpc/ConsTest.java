@@ -16,6 +16,8 @@ import org.junit.Test;
 
 import com.google.protobuf.Message;
 
+import dev.resteasy.grpc.arrays.ArrayUtility;
+import dev.resteasy.grpc.arrays.Array_proto.dev_resteasy_grpc_arrays___ArrayHolder;
 import dev.resteasy.grpc.bridge.runtime.protobuf.JavabufTranslator;
 import dev.resteasy.grpc.example.ArrayStuff;
 import dev.resteasy.grpc.example.CC1;
@@ -26,8 +28,139 @@ import dev.resteasy.grpc.example.CC2;
 
 public class ConsTest {
 
+    public static void main(String[] args) {
+        //        for (FieldDescriptor fd : ELEMENT_WRAPPER.getDescriptor().getFields()) {
+        //            String s = fd.getFullName();
+        //            //          System.out.println(s);
+        //            int pos = s.lastIndexOf(".");
+        //            if (pos >= 0) {
+        //                s = s.substring(pos + 1);
+        //            }
+        //            pos = s.indexOf("_");
+        //            if (pos < 0) {
+        //                continue;
+        //            }
+        //            s = s.substring(0, s.length() - "_field".length());
+        //            //          System.out.println(s + "\r");
+        //            s = Utility.getJavaClassname(s);
+        //            System.out.println("EW:" + s);
+        //            //          fdMap.put(s, fd);
+        //        }
+        //
+        //        ArrayStuff.Stuff as = new ArrayStuff.Stuff();
+        //        System.out.println(as.getClass().getCanonicalName() + ", " + as.getClass().getName());
+        //        JavabufTranslator jt;
+        CC1JavabufTranslator translator = (CC1JavabufTranslator) CC1JavabufTranslator.INSTANCE;
+
+        //        {
+        //            translator.setUseSparseArrays(false);
+        //            dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage.Builder builder = dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage
+        //                    .newBuilder();
+        //            int[] ints = new int[] { 1, 2, 3 };
+        //            dev_resteasy_grpc_arrays___ArrayHolder ah = (dev_resteasy_grpc_arrays___ArrayHolder) translator
+        //                    .translateToJavabuf(ints);
+        //            System.out.println(ah);
+        //            builder.setDevResteasyGrpcArraysDevResteasyGrpcArraysArrayHolderField(ah);
+        //        }
+        //           GeneralEntityMessage gem = builder.setDevResteasyGrpcArraysDevResteasyGrpcArraysArrayHolderField(ah).build();
+        //           GeneralReturnMessage response;
+        //           try {
+        //               response = stub.arraysInt1(gem);
+        //               dev_resteasy_grpc_arrays___ArrayHolder as = response
+        //                       .getDevResteasyGrpcArraysDevResteasyGrpcArraysArrayHolderField();
+        //               Object o = translator.translateFromJavabuf(as);
+        //               int[] expected = new int[] { 2, 3, 4 };
+        //               Assert.assertArrayEquals(expected, (int[]) o);
+        //           } catch (StatusRuntimeException e) {
+        //               try (StringWriter writer = new StringWriter()) {
+        //                   e.printStackTrace(new PrintWriter(writer));
+        //                   Assert.fail(writer.toString());
+        //               }
+        //           }
+        //        }
+
+        //        {
+        //            translator.setUseSparseArrays(true);
+        //            dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage.Builder builder = dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage
+        //                    .newBuilder();
+        //            int[] ints = new int[] { 1, 2, 3 };
+        //            Object o = translator.translateToJavabuf(ints);
+        //            System.out.println(o);
+        //            //           builder.setDevResteasyGrpcArraysDevResteasyGrpcArraysArrayHolderField(ah);
+        //        }
+        //
+        //        {
+        //            translator.setUseSparseArrays(true);
+        //            ArrayStuff2 as2 = new ArrayStuff2();
+        //            Object o = translator.translateToJavabuf(as2);
+        //            System.out.println(o);
+        //        }
+        {
+            Integer[] is = new Integer[] { Integer.valueOf(3), null, Integer.valueOf(5) };
+            //        {
+            //            Message m = translator.translateFromSparseArray((Object) is);
+            //            System.out.println(m);
+            //            Integer[] array = (Integer[]) CC1JavabufTranslator1.INSTANCE.translateToSparseArray((ELEMENT_WRAPPER_Array) m);
+            //            System.out.println(array);
+            //            try {
+            //                Assert.assertArrayEquals(is, array);
+            //            } catch (Exception e) {
+            //                e.printStackTrace();
+            //                return;
+            //            }
+            //            System.out.println("ok");
+            //        }
+            //        {
+            translator.setUseSparseArrays(true);
+            Message m = translator.translateToJavabuf(is);
+            System.out.println(m);
+            Integer[] array = (Integer[]) translator.translateFromJavabuf(m);
+            System.out.println(array);
+            try {
+                Assert.assertArrayEquals(is, array);
+                System.out.println("ok");
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        {
+            Integer[][] iss = new Integer[][] { { Integer.valueOf(3), Integer.valueOf(5) }, null,
+                    { Integer.valueOf(7), Integer.valueOf(11) } };
+            translator.setUseSparseArrays(true);
+            Message m = translator.translateToJavabuf(iss);
+            System.out.println(m);
+            Integer[][] array = (Integer[][]) translator.translateFromJavabuf(m);
+            Assert.assertArrayEquals(iss, array);
+            System.out.println("ok");
+        }
+
+        {
+            Integer[][] iss = new Integer[][] { { Integer.valueOf(3), Integer.valueOf(5) },
+                    { Integer.valueOf(7), Integer.valueOf(11) } };
+            translator.setUseSparseArrays(false);
+            Message m = translator.translateToJavabuf(iss);
+            System.out.println(m);
+            Integer[][] array = (Integer[][]) translator.translateFromJavabuf(m);
+            Assert.assertArrayEquals(iss, array);
+            System.out.println("ok");
+        }
+
+        {
+            //           CC1JavabufTranslator.INSTANCE.setUseSparseArrays(false);
+            translator.setUseSparseArrays(false);
+            ArrayStuff[] ass = new ArrayStuff[] { new ArrayStuff(true), new ArrayStuff(false) };
+            dev_resteasy_grpc_arrays___ArrayHolder holder = (dev_resteasy_grpc_arrays___ArrayHolder) translator
+                    .translateToJavabuf(ass);
+            Object array = translator.translateFromJavabuf(holder);
+            Assert.assertArrayEquals(ass, (ArrayStuff[]) array);
+            System.out.println("ok");
+        }
+    }
+
     @Test
-    //    @Ignore
+    @Ignore
     public void testHashMap() {
         HashMap<Integer, String> map = new HashMap<Integer, String>();
         map.put(Integer.valueOf(3), "three");
@@ -305,4 +438,22 @@ public class ConsTest {
 
     static class E extends D {
     }
+
+    @Test
+    @Ignore
+    public void sparseTest() throws Exception {
+        Integer[] is = new Integer[5];
+        is[1] = Integer.valueOf(3);
+        dev_resteasy_grpc_arrays___ArrayHolder ah = ArrayUtility.getHolder(is);
+        Object o = ArrayUtility.getArray(ah);
+    }
+    //
+    //    @Test
+    //    @Ignore
+    //    public void EWTest() {
+    //        CC1JavabufTranslator1 translator = (CC1JavabufTranslator1) CC1JavabufTranslator1.INSTANCE;
+    //        CC1JavabufTranslator1.ELEMENT_WRAPPER_ToJavabuf tj = new CC1JavabufTranslator1.ELEMENT_WRAPPER_ToJavabuf();
+    //        Integer[] is = new Integer[] { Integer.valueOf(3), null, Integer.valueOf(5) };
+    //        Message m = tj.assignToJavabuf(is);
+    //    }
 }

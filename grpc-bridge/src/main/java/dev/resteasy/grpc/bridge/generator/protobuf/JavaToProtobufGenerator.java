@@ -563,14 +563,22 @@ public class JavaToProtobufGenerator {
                     .append(counter++)
                     .append(";" + LS);
         }
-        sb.append("   }" + LS + "}" + LS);
+        sb.append("   }" + LS + "}" + LS + LS);
     }
 
     private static void writeProtoFile(String[] args, StringBuilder sb) throws IOException {
         Path path = Files.createDirectories(Path.of(args[0], "src", "main", "proto"));
         if (path.resolve(args[3] + ".proto").toFile().exists()) {
-            //            return;
+            return;
         }
+        if (repeatedTypes.size() == 0) {
+            repeatedTypes.add("google.protobuf.Any");
+        }
+        writeSparseArrayTypes(sb);
+        Files.writeString(path.resolve(args[3] + ".proto"), sb.toString() + wrapperBuilder.toString(), StandardCharsets.UTF_8);
+    }
+
+    private static void writeSparseArrayTypes(StringBuilder sb) {
         counter = 0;
         wrapperBuilder.append("message ELEMENT_WRAPPER {" + LS)
                 .append("   int64 position = " + ++counter + ";" + LS)
@@ -586,10 +594,11 @@ public class JavaToProtobufGenerator {
                     .append(++counter)
                     .append(";" + LS);
         }
-        wrapperBuilder.append("   }" + LS).append("}" + LS);
-        Files.writeString(path.resolve(args[3] + ".proto"), sb.toString() + wrapperBuilder.toString(), StandardCharsets.UTF_8);
-        Path path2 = Path.of("/tmp/CC1.proto");
-        Files.writeString(path2, sb.toString(), StandardCharsets.UTF_8);
+        wrapperBuilder.append("      SparseArray SparseArray_field = " + ++counter + ";" + LS);
+        wrapperBuilder.append("   }" + LS).append("}" + LS + LS);
+        wrapperBuilder.append("message SparseArray {" + LS)
+                .append("   repeated ELEMENT_WRAPPER ELEMENT_WRAPPER_field = 1;" + LS)
+                .append("}" + LS + LS);
     }
 
     private static void createProtobufDirectory(String[] args) {

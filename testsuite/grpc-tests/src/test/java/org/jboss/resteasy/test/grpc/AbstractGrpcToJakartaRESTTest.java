@@ -34,6 +34,7 @@ import dev.resteasy.grpc.arrays.Array_proto.dev_resteasy_grpc_arrays___ArrayHold
 import dev.resteasy.grpc.bridge.runtime.Utility;
 import dev.resteasy.grpc.bridge.runtime.protobuf.JavabufTranslator;
 import dev.resteasy.grpc.example.ArrayStuff;
+import dev.resteasy.grpc.example.CC1JavabufTranslator;
 import dev.resteasy.grpc.example.CC1ServiceGrpc.CC1ServiceBlockingStub;
 import dev.resteasy.grpc.example.CC1ServiceGrpc.CC1ServiceFutureStub;
 import dev.resteasy.grpc.example.CC1ServiceGrpc.CC1ServiceStub;
@@ -172,7 +173,8 @@ abstract class AbstractGrpcToJakartaRESTTest {
         this.testArraysInts2(stub);
         this.testArraysInts5(stub);
         this.testArrayStuff(stub);
-        this.testArrayStuffArray(stub);
+        this.testArrayStuffArray1(stub);
+        this.testArrayStuffArray2(stub);
         this.doCollectionTests(stub);
     }
 
@@ -1543,6 +1545,8 @@ abstract class AbstractGrpcToJakartaRESTTest {
     ///       array tests      ///
     //////////////////////////////
     void testArraysInts1(CC1ServiceBlockingStub stub) throws Exception {
+        boolean b = translator.getUseSparseArrays();
+        translator.setUseSparseArrays(false);
         dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage.Builder builder = dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage
                 .newBuilder();
         int[] ints = new int[] { 1, 2, 3 };
@@ -1561,6 +1565,8 @@ abstract class AbstractGrpcToJakartaRESTTest {
                 e.printStackTrace(new PrintWriter(writer));
                 Assert.fail(writer.toString());
             }
+        } finally {
+            translator.setUseSparseArrays(b);
         }
     }
 
@@ -1568,6 +1574,8 @@ abstract class AbstractGrpcToJakartaRESTTest {
         dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage.Builder builder = dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage
                 .newBuilder();
         int[] ints = new int[] { 1, 2, 3 };
+        boolean b = translator.getUseSparseArrays();
+        translator.setUseSparseArrays(false);
         dev_resteasy_grpc_arrays___ArrayHolder ah = (dev_resteasy_grpc_arrays___ArrayHolder) translator
                 .translateToJavabuf(ints);
         GeneralEntityMessage gem = builder.setDevResteasyGrpcArraysDevResteasyGrpcArraysArrayHolderField(ah).build();
@@ -1584,10 +1592,14 @@ abstract class AbstractGrpcToJakartaRESTTest {
                 e.printStackTrace(new PrintWriter(writer));
                 Assert.fail(writer.toString());
             }
+        } finally {
+            translator.setUseSparseArrays(b);
         }
     }
 
     void testArraysInts2(CC1ServiceBlockingStub stub) throws Exception {
+        boolean b = translator.getUseSparseArrays();
+        translator.setUseSparseArrays(false);
         dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage.Builder builder = dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage
                 .newBuilder();
         int[][] intss = new int[][] { { 1, 2 }, { 3, 4 } };
@@ -1606,10 +1618,14 @@ abstract class AbstractGrpcToJakartaRESTTest {
                 e.printStackTrace(new PrintWriter(writer));
                 Assert.fail(writer.toString());
             }
+        } finally {
+            translator.setUseSparseArrays(b);
         }
     }
 
     void testArraysInts5(CC1ServiceBlockingStub stub) throws Exception {
+        boolean b = translator.getUseSparseArrays();
+        translator.setUseSparseArrays(false);
         dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage.Builder builder = dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage
                 .newBuilder();
         int[][][][][] intsssss = new int[][][][][] { { { { { 1, 2, 3 } } } }, { { { { 4, 5 } } } } };
@@ -1628,10 +1644,14 @@ abstract class AbstractGrpcToJakartaRESTTest {
                 e.printStackTrace(new PrintWriter(writer));
                 Assert.fail(writer.toString());
             }
+        } finally {
+            translator.setUseSparseArrays(b);
         }
     }
 
     void testArrayStuff(CC1ServiceBlockingStub stub) throws Exception {
+        boolean b = translator.getUseSparseArrays();
+        translator.setUseSparseArrays(false);
         dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage.Builder builder = dev.resteasy.grpc.example.CC1_proto.GeneralEntityMessage
                 .newBuilder();
         ArrayStuff as = new ArrayStuff(false);
@@ -1649,10 +1669,15 @@ abstract class AbstractGrpcToJakartaRESTTest {
                 e.printStackTrace(new PrintWriter(writer));
                 Assert.fail(writer.toString());
             }
+        } finally {
+            translator.setUseSparseArrays(b);
         }
     }
 
-    void testArrayStuffArray(CC1ServiceBlockingStub stub) throws Exception {
+    void testArrayStuffArray1(CC1ServiceBlockingStub stub) throws Exception {
+        boolean b = translator.getUseSparseArrays();
+        translator.setUseSparseArrays(false);
+        CC1JavabufTranslator.INSTANCE.setUseSparseArrays(false);
         ArrayStuff[] ass = new ArrayStuff[] { new ArrayStuff(true), new ArrayStuff(false) };
         dev_resteasy_grpc_arrays___ArrayHolder holder = (dev_resteasy_grpc_arrays___ArrayHolder) translator
                 .translateToJavabuf(ass);
@@ -1669,6 +1694,33 @@ abstract class AbstractGrpcToJakartaRESTTest {
                 e.printStackTrace(new PrintWriter(writer));
                 Assert.fail(writer.toString());
             }
+        } finally {
+            translator.setUseSparseArrays(b);
+        }
+    }
+
+    void testArrayStuffArray2(CC1ServiceBlockingStub stub) throws Exception {
+        boolean b = translator.getUseSparseArrays();
+        translator.setUseSparseArrays(false);
+        CC1JavabufTranslator.INSTANCE.setUseSparseArrays(true);
+        ArrayStuff[] ass = new ArrayStuff[] { new ArrayStuff(true), new ArrayStuff(false) };
+        dev_resteasy_grpc_arrays___ArrayHolder holder = (dev_resteasy_grpc_arrays___ArrayHolder) translator
+                .translateToJavabuf(ass);
+        GeneralEntityMessage.Builder builder = GeneralEntityMessage.newBuilder();
+        GeneralEntityMessage gem = builder.setDevResteasyGrpcArraysDevResteasyGrpcArraysArrayHolderField(holder).build();
+        GeneralReturnMessage response;
+        try {
+            response = stub.arrayStuffArray(gem);
+            dev_resteasy_grpc_arrays___ArrayHolder holder2 = response
+                    .getDevResteasyGrpcArraysDevResteasyGrpcArraysArrayHolderField();
+            Assert.assertArrayEquals(ass, (ArrayStuff[]) translator.translateFromJavabuf(holder2));
+        } catch (StatusRuntimeException e) {
+            try (StringWriter writer = new StringWriter()) {
+                e.printStackTrace(new PrintWriter(writer));
+                Assert.fail(writer.toString());
+            }
+        } finally {
+            translator.setUseSparseArrays(b);
         }
     }
 
